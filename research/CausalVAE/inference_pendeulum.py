@@ -57,7 +57,7 @@ layout = [
 ]
 model_name = '_'.join([t.format(v) for (t, v) in layout])
 if args.dag == "sup_dag":
-  lvae = sup_dag.CausalVAE(name=model_name, z_dim=16, inference = True).to(device)
+  lvae = sup_dag.CausalVAE(name=model_name, z_dim=24, z1_dim=4, z2_dim=6, inference = True).to(device)
   ut.load_model_by_name(lvae, 0)
 
 if not os.path.exists('./figs_test_vae_pendulum/'): 

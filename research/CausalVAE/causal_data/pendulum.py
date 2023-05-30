@@ -25,7 +25,7 @@ def projection(theta, phi, x, y, base = -0.5):
 # 
 scale = np.array([[0,44],[100,40],[7,7.5],[10,10]])
 count = 0
-empty = pd.DataFrame(columns=['i', 'j', 'shade','mid'])
+empty = pd.DataFrame(columns=['i', 'j', 'shade','mid']) # 4 label is [pendulum, light, shade, mid]
 for i in range(-40,44):#pendulum
     for j in range(60,148):#light
         if j == 100:
@@ -68,7 +68,7 @@ for i in range(-40,44):#pendulum
                  index=[1])
         empty=empty.append(new,ignore_index=True)
         plt.axis('off')
-        if count == 4:
+        if count == 4: # 这里按照4：1划分train和test
           plt.savefig('./causal_data/pendulum/test/a_' + str(int(i)) + '_' + str(int(j)) + '_' + str(int(shade)) + '_' + str(int(mid)) +'.png',dpi=96)
           count = 0
         else:

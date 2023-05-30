@@ -225,7 +225,7 @@ class CausalLayer(nn.Module):
    
    
 class Attention(nn.Module):
-  def __init__(self, in_features, bias=False):
+  def __init__(self, in_features, bias=False): # in_features z2_dim
     super().__init__()
     self.M =  nn.Parameter(torch.nn.init.normal_(torch.zeros(in_features,in_features), mean=0, std=1))
     self.sigmd = torch.nn.Sigmoid()
@@ -233,6 +233,10 @@ class Attention(nn.Module):
     #self.A = torch.zeros(in_features,in_features).to(device)
     
   def attention(self, z, e):
+    # z: decode_m [64, z1_dim, z2_dim]
+	# e: q_m [64, z1_dim, z2_dim]
+	# M: [z1_dim, z1_dim]
+    # breakpoint()
     a = z.matmul(self.M).matmul(e.permute(0,2,1))
     a = self.sigmd(a)
     #print(self.M)
@@ -246,7 +250,7 @@ class DagLayer(nn.Linear):
         self.in_features = in_features
         self.out_features = out_features
         self.i = i
-        self.a = torch.zeros(out_features,out_features)
+        self.a = torch.zeros(out_features,out_features) # z1_dim
         self.a = self.a
         #self.a[0][1], self.a[0][2], self.a[0][3] = 1,1,1
         #self.a[1][2], self.a[1][3] = 1,1
@@ -259,7 +263,7 @@ class DagLayer(nn.Linear):
         self.I = nn.Parameter(torch.eye(out_features))
         self.I.requires_grad=False
         if bias:
-            self.bias = Parameter(torch.Tensor(out_features))
+            self.bias = nn.Parameter(torch.Tensor(out_features))
         else:
             self.register_parameter('bias', None)
             
@@ -296,8 +300,8 @@ class DagLayer(nn.Linear):
         #x = F.linear(x, torch.inverse((torch.abs(self.A))+self.I), self.bias)
         
         if x.dim()>2:
-            x = x.permute(0,2,1)
-        x = F.linear(x, torch.inverse(self.I - self.A.t()), self.bias) 
+            x = x.permute(0,2,1) # x [batch_size, z2_dim, z1_dim]
+        x = F.linear(x, torch.inverse(self.I - self.A.t()), self.bias) # 对应于论文中的公式(1)
         #print(x.size())
        
         if x.dim()>2:
@@ -519,6 +523,7 @@ class Encoder(nn.Module):
 		xy = xy.view(-1, self.channel*96*96)
 		h = self.net(xy)
 		m, v = ut.gaussian_parameters(h, dim=1)
+		# h [64*2*16], 拆成[64, 16] [64, 16]，并且给var做一个softplus
 		#print(self.z_dim,m.size(),v.size())
 		return m, v
    

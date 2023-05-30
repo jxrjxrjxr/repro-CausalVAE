@@ -123,6 +123,7 @@ class dataload_withlabel(data.Dataset):
         self.imgs = [os.path.join(root, k) for k in imgs]
         self.imglabel = [list(map(int,k[:-4].split("_")[1:]))  for k in imgs]
         #print(self.imglabel)
+        # label : [pendulum, light, shade_len, shade_mid]
         self.transforms = transforms.Compose([transforms.ToTensor()])
 
     def __getitem__(self, idx):
@@ -134,7 +135,7 @@ class dataload_withlabel(data.Dataset):
         pil_img = Image.open(img_path)
         array = np.asarray(pil_img)
         array1 = np.asarray(label)
-        label = torch.from_numpy(array1)
+        label = torch.from_numpy(array1) # 脱裤子放屁
         data = torch.from_numpy(array)
         if self.transforms:
             data = self.transforms(pil_img)
@@ -142,7 +143,7 @@ class dataload_withlabel(data.Dataset):
             pil_img = np.asarray(pil_img).reshape(96,96,4)
             data = torch.from_numpy(pil_img)
         
-        return data, label.float()
+        return data, label.float() # 数据维度：data:[96, 96, 4], label:[4,]
 
     def __len__(self):
         return len(self.imgs)

@@ -77,7 +77,7 @@ layout = [
 model_name = '_'.join([t.format(v) for (t, v) in layout])
 pprint(vars(args))
 print('Model name:', model_name)
-lvae = CausalVAE(name=model_name, z_dim=16).to(device)
+lvae = CausalVAE(name=model_name, z_dim=24, z1_dim=4, z2_dim=6).to(device) # 这里是从mask_vae_pendulum导入的causalVAE，不同的数据集有什么区别？
 if not os.path.exists('./figs_vae/'): 
 	os.makedirs('./figs_vae/')
 
@@ -105,7 +105,7 @@ for epoch in range(args.epoch_max):
 	for u, l in train_dataset:
 		optimizer.zero_grad()
 		#u = torch.bernoulli(u.to(device).reshape(u.size(0), -1))
-		u = u.to(device)
+		u = u.to(device) # shape should be [64, 96, 96, 4]
 		L, kl, rec, reconstructed_image,_ = lvae.negative_elbo_bound(u,l,sample = False)
 		
 		dag_param = lvae.dag.A
@@ -113,6 +113,7 @@ for epoch in range(args.epoch_max):
 		#dag_reg = dag_regularization(dag_param)
 		h_a = _h_A(dag_param, dag_param.size()[0])
 		L = L + 3*h_a + 0.5*h_a*h_a #- torch.norm(dag_param) 
+		# 这里的loss是直接写死的两个超参数么？h_a * h_a是什么？
    
    
 		L.backward()
